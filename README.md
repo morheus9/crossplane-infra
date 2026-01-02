@@ -65,7 +65,7 @@ kubectl port-forward svc/argocd-server -n argocd 8080:443
 
 Откройте в браузере: `https://localhost:8080`
 
-**Логин:** `admin`  
+**Логин:** `admin`
 **Пароль:** [полученный выше]
 
 ### 5. Проверка установки
