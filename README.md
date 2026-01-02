@@ -1,0 +1,239 @@
+# Crossplane Infrastructure with Argo CD
+
+Проект для развертывания инфраструктуры на базе Crossplane с управлением через Argo CD и секретами через External Secrets Operator.
+
+## 🏗️ Архитектура
+
+Проект использует GitOps подход с Argo CD для управления инфраструктурой:
+
+```
+├── bootstrap/               # Корневой Argo CD Application (запускается вручную)
+│   └── root-app.yaml        # Мониторит папку apps/
+├── apps/                    # Приложения, управляемые Root App
+│   ├── argocd.yaml          # Argo CD (указывает на charts/argocd)
+│   ├── crossplane.yaml      # Crossplane v2.1.3
+│   └── external-secrets.yaml # External Secrets v1.2.1
+└── charts/                  # Кастомные Helm чарты
+    └── argocd/
+        ├── Chart.yaml       # Зависимость от argo-cd 9.2.3
+        └── values.yaml      # Кастомные настройки Argo CD
+```
+
+## 📋 Предварительные требования
+
+- Kubernetes кластер (EKS, GKE, AKS или локальный)
+- kubectl настроенный для доступа к кластеру
+- Git репозиторий (уже настроен: `https://github.com/morheus9/crossplane-infra`)
+
+
+## 🚀 Установка
+
+### 1. Клонирование репозитория
+
+```bash
+git clone https://github.com/morheus9/crossplane-infra.git
+cd crossplane-infra
+```
+
+### 2. Создание namespace для Argo CD
+
+```bash
+kubectl create namespace argocd
+```
+
+### 3. Установка Root Application
+
+Root Application запускается **вручную один раз** и затем автоматически управляет всеми остальными приложениями:
+
+```bash
+kubectl apply -f bootstrap/root-app.yaml
+```
+
+### 4. Доступ к Argo CD UI
+
+Получите пароль для входа в Argo CD:
+
+```bash
+kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d; echo
+```
+
+Порт-форвардинг для доступа к веб-интерфейсу:
+
+```bash
+kubectl port-forward svc/argocd-server -n argocd 8080:443
+```
+
+Откройте в браузере: `https://localhost:8080`
+
+**Логин:** `admin`  
+**Пароль:** [полученный выше]
+
+### 5. Проверка установки
+
+Проверьте статус приложений в Argo CD UI или через CLI:
+
+```bash
+kubectl get applications -n argocd
+```
+
+Ожидаемые приложения:
+- `root-app` - Корневое приложение
+- `argocd` - Argo CD
+- `crossplane` - Crossplane
+- `external-secrets` - External Secrets Operator
+
+## ⚙️ Настройка
+
+### Argo CD
+
+Argo CD настроен с:
+- **Репозитории:** Добавлены репозитории Crossplane и External Secrets
+- **RBAC:** Базовая политика доступа
+- **Сервис:** LoadBalancer для внешнего доступа
+- **Плагины:** Kustomize плагин
+
+### Crossplane
+
+Crossplane установлен с:
+- **CRDs:** Автоматическая установка CRDs
+- **Безопасность:** Non-root пользователь
+- **Провайдеры:** Готов к добавлению провайдеров
+
+### External Secrets
+
+External Secrets настроен с:
+- **CRDs:** Автоматическая установка
+- **Webhook:** Включен валидационный webhook
+- **ServiceAccount:** Создан для доступа к секретам
+
+## 🔧 Добавление провайдеров Crossplane
+
+После установки добавьте необходимые провайдеры:
+
+```bash
+# Пример добавления провайдера (замените на нужный провайдер)
+kubectl apply -f - <<EOF
+apiVersion: pkg.crossplane.io/v1
+kind: Provider
+metadata:
+  name: provider-example
+spec:
+  package: xpkg.crossplane.io/crossplane-contrib/provider-example:v1.0.0
+EOF
+```
+
+## 🔐 Настройка секретов (External Secrets)
+
+После установки External Secrets настройте SecretStore для доступа к вашим секретам:
+
+```yaml
+apiVersion: external-secrets.io/v1beta1
+kind: SecretStore
+metadata:
+  name: my-secret-store
+  namespace: default
+spec:
+  provider:
+    # Настройте провайдера согласно вашей системе секретов
+    # (HashiCorp Vault, Azure Key Vault, GCP Secret Manager и т.д.)
+    vault:
+      server: "http://vault.example.com:8200"
+      path: "secret"
+      auth:
+        kubernetes:
+          mountPath: "kubernetes"
+          role: "external-secrets"
+```
+
+## 📊 Мониторинг
+
+### Проверка статуса компонентов:
+
+```bash
+# Argo CD
+kubectl get pods -n argocd
+
+# Crossplane
+kubectl get pods -n crossplane-system
+
+# External Secrets
+kubectl get pods -n external-secrets-system
+```
+
+### Логи компонентов:
+
+```bash
+# Argo CD Server
+kubectl logs -n argocd deployment/argocd-server
+
+# Crossplane
+kubectl logs -n crossplane-system deployment/crossplane
+
+# External Secrets
+kubectl logs -n external-secrets-system deployment/external-secrets-webhook
+```
+
+## 🛠️ Разработка и обновление
+
+### Добавление нового приложения:
+
+1. Создайте YAML файл в папке `apps/`
+2. Следуйте паттерну существующих приложений
+3. Argo CD автоматически обнаружит и развернет приложение
+
+### Обновление версий:
+
+1. Проверьте актуальные версии чартов
+2. Обновите `targetRevision` в соответствующих YAML файлах
+3. Зафиксируйте изменения в Git
+4. Argo CD автоматически применит обновления
+
+## 🐛 Устранение неполадок
+
+### Argo CD не синхронизируется:
+
+```bash
+# Проверьте статус приложения
+kubectl get applications -n argocd
+
+# Детальный статус
+kubectl describe application <app-name> -n argocd
+```
+
+### Crossplane не работает:
+
+```bash
+# Проверьте CRDs
+kubectl get crds | grep crossplane
+
+# Проверьте логи
+kubectl logs -n crossplane-system deployment/crossplane
+```
+
+### Проблемы с секретами:
+
+```bash
+# Проверьте SecretStore
+kubectl get secretstore
+
+# Проверьте ExternalSecret
+kubectl describe externalsecret <name>
+```
+
+## 📚 Дополнительные ресурсы
+
+- [Argo CD Documentation](https://argo-cd.readthedocs.io/)
+- [Crossplane Documentation](https://docs.crossplane.io/)
+- [External Secrets Documentation](https://external-secrets.io/)
+- [GitOps Best Practices](https://argo-cd.readthedocs.io/en/stable/user-guide/best_practices/)
+
+## 🤝 Вклад в проект
+
+1. Fork репозиторий
+2. Создайте feature branch
+3. Внесите изменения
+4. Создайте Pull Request
+
+## 📄 Лицензия
+
+Этот проект распространяется под лицензией MIT. См. файл `LICENSE` для подробностей.

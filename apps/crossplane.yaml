@@ -1,0 +1,51 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: crossplane
+  namespace: crossplane-system
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  labels:
+    app.kubernetes.io/name: crossplane
+spec:
+  project: default
+  source:
+    repoURL: https://charts.crossplane.io/stable
+    chart: crossplane
+    targetRevision: 2.1.3
+    helm:
+      parameters:
+        - name: installCRDs
+          value: "true"
+        - name: provider.packages
+          value: "[]"
+        - name: securityContextCrossplane.runAsUser
+          value: "65532"
+        - name: securityContextCrossplane.runAsGroup
+          value: "65532"
+        - name: securityContextCrossplane.runAsNonRoot
+          value: "true"
+        - name: securityContextRBACManager.runAsUser
+          value: "65532"
+        - name: securityContextRBACManager.runAsGroup
+          value: "65532"
+        - name: securityContextRBACManager.runAsNonRoot
+          value: "true"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: crossplane-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m

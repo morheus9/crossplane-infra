@@ -1,0 +1,66 @@
+# Argo CD custom values
+argo-cd:
+  # Server configuration
+  server:
+    # Enable additional routes
+    extraArgs:
+      - --insecure
+      - --disable-auth
+
+    # Service configuration
+    service:
+      type: LoadBalancer
+
+    # Ingress configuration (optional, if you want ingress instead of LoadBalancer)
+    ingress:
+      enabled: false
+
+  # Repository server configuration
+  repoServer:
+    # Additional repositories
+    extraRepos:
+      - url: https://charts.crossplane.io/stable
+        name: crossplane-stable
+        type: helm
+      - url: https://charts.external-secrets.io
+        name: external-secrets
+        type: helm
+
+  # ApplicationSet controller
+  applicationSet:
+    enabled: true
+
+  # RBAC configuration
+  rbac:
+    # Default policy CSV
+    policy.csv: |
+      g, argocd-admin, role:admin
+
+  # Config management plugins
+  configManagementPlugins: |
+    - name: kustomize
+      init:
+        command: [kustomize, version]
+      generate:
+        command: [kustomize, build, .]
+
+  # Resource limits and requests
+  global:
+    image:
+      repository: quay.io/argoproj/argocd
+      tag: "v2.10.0"
+
+  redis:
+    enabled: true
+
+  # Dex configuration (optional, for SSO)
+  dex:
+    enabled: false
+
+  # Notifications (optional)
+  notifications:
+    enabled: false
+
+  # Prometheus metrics
+  prometheus:
+    enabled: true
