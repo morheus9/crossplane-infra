@@ -9,30 +9,44 @@ repos:
       - id: check-added-large-files
       - id: end-of-file-fixer
 
+  # ____________________________Yaml____________________________
   - repo: https://github.com/adrienverge/yamllint.git
     rev: v1.37.1
     hooks:
       - id: yamllint
   #        args: [-c=.yamllint]
 
+  # ____________________________Security____________________________
   - repo: https://github.com/bridgecrewio/checkov.git
     rev: 3.2.497
     hooks:
       - id: checkov
         args: [-d .]
 
-  - repo: https://github.com/Agilicus/pre-commit-hook-k8svalidate.git
-    rev: v0.2.0
-    hooks:
-      - id: k8svalidate
-        files: .yaml$
-
   - repo: https://github.com/Yelp/detect-secrets
     rev: v1.5.0
     hooks:
       - id: detect-secrets
 
-  # Languages
+  # ____________________________K8s____________________________
+  - repo: https://github.com/Agilicus/pre-commit-hook-k8svalidate.git
+    rev: v0.2.0
+    hooks:
+      - id: k8svalidate
+        files: .yaml$
+  # ____________________________Terraform____________________________
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.104.0
+    hooks:
+      - id: terraform_fmt
+        args: [-recursive]
+      - id: terraform_validate
+        args: [-recursive]
+      - id: terraform_tflint
+        args: [-recursive]
+      - id: terraform_docs
+        args: [-recursive]
+  # ____________________________Languages____________________________
   # Python
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.14.10
@@ -40,7 +54,7 @@ repos:
       - id: ruff-check
         args: [--fix]
       - id: ruff-format
-  #Go
+  # Go
   - repo: https://github.com/TekWizely/pre-commit-golang
     rev: master
     hooks:
