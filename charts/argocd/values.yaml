@@ -1,3 +1,4 @@
+---
 # Argo CD custom values
 argo-cd:
   # Server configuration
