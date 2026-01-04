@@ -1,0 +1,5 @@
+---
+# External Secrets custom values
+
+serviceAccount:
+  name: "external-secrets-sa"

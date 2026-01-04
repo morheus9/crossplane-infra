@@ -1,0 +1,12 @@
+---
+apiVersion: v2
+name: crossplane
+description: Crossplane chart wrapper with custom values
+type: application
+version: 0.1.0
+appVersion: "2.1.3"
+
+dependencies:
+  - name: crossplane
+    version: "2.1.3"
+    repository: "https://charts.crossplane.io/stable"
