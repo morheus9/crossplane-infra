@@ -1,0 +1,12 @@
+{{- if .Values.providerConfig.create }}
+---
+apiVersion: kubernetes.crossplane.io/v1alpha1
+kind: ProviderConfig
+metadata:
+  name: {{ .Values.providerConfig.name }}
+  labels:
+    app.kubernetes.io/name: kubernetes-provider
+spec:
+  credentials:
+    source: {{ .Values.providerConfig.credentials.source }}
+{{- end }}

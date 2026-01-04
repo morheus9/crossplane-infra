@@ -2,31 +2,31 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: root-app
+  name: kubernetes-provider
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
   labels:
-    app.kubernetes.io/name: root-app
-    app.kubernetes.io/component: application-controller
+    app.kubernetes.io/name: kubernetes-provider
 spec:
   project: default
   source:
     repoURL: https://github.com/morheus9/crossplane-infra
     targetRevision: HEAD
-    path: .
-    directory:
-      include: "apps/*.yaml"
+    path: charts/kubernetes-provider
+    helm:
+      valueFiles:
+        - values.yaml
   destination:
     server: https://kubernetes.default.svc
-    namespace: argocd
+    namespace: crossplane-system
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
       allowEmpty: false
     syncOptions:
-      - CreateNamespace=true
+      - CreateNamespace=false
     retry:
       limit: 5
       backoff:

@@ -1,3 +1,6 @@
 ---
 # Crossplane custom values
-# All current parameters use defaults, so this file is minimal
+
+provider:
+  packages:
+    - crossplane/provider-kubernetes:v1.2.0
