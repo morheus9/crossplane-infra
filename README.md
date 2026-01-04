@@ -17,14 +17,12 @@
 │   └── root-app.yaml        # Мониторит apps/ и infra/apps/
 ├── apps/                    # ArgoCD Applications
 │   ├── argocd.yaml          # Argo CD (управляется root-app через Apps of Apps)
-│   ├── crossplane.yaml      # Crossplane v2.1.3
-│   ├── external-secrets.yaml # External Secrets v1.2.1
-│   └── kubernetes-provider.yaml # Kubernetes провайдер для Crossplane
+│   ├── crossplane.yaml      # Crossplane v2.1.3 + Kubernetes провайдер
+│   └── external-secrets.yaml # External Secrets v1.2.1
 └── charts/                  # Кастомные Helm чарты
     ├── argocd/
     ├── crossplane/
-    ├── external-secrets/
-    └── kubernetes-provider/  # Wrapper чарт для Kubernetes провайдера
+    └── external-secrets/
 ```
 
 ## 📋 Предварительные требования
@@ -94,9 +92,8 @@ kubectl get applications -n argocd
 Ожидаемые приложения в Argo CD (все управляются root-app):
 - `root-app` - Корневое приложение (самоуправление)
 - `argocd` - **Argo CD управляет сам собой** ⚠️
-- `crossplane` - Crossplane
+- `crossplane` - Crossplane + Kubernetes провайдер
 - `external-secrets` - External Secrets Operator
-- `kubernetes-provider` - Kubernetes провайдер для Crossplane
 
 ## ⚙️ Настройка
 
@@ -113,7 +110,15 @@ Argo CD настроен с:
 Crossplane установлен с:
 - **CRDs:** Автоматическая установка CRDs
 - **Безопасность:** Non-root пользователь
-- **Провайдеры:** Kubernetes провайдер (v1.2.0) установлен и настроен
+- **Провайдеры:** Kubernetes провайдер (v1.2.0) устанавливается автоматически
+
+**Добавление провайдеров:** Добавьте пакеты в `charts/crossplane/values.yaml`:
+```yaml
+provider:
+  packages:
+    - crossplane/provider-kubernetes:v1.2.0
+    - xpkg.crossplane.io/crossplane-contrib/provider-aws:v0.45.0  # Пример
+```
 
 ### External Secrets
 

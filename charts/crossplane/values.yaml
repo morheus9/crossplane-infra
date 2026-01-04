@@ -4,3 +4,5 @@
 provider:
   packages:
     - crossplane/provider-kubernetes:v1.2.0
+  # - xpkg.crossplane.io/crossplane-contrib/provider-aws:v0.45.0
+  # - xpkg.crossplane.io/crossplane-contrib/provider-gcp:v0.22.0
