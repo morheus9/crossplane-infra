@@ -14,9 +14,9 @@ spec:
   source:
     repoURL: https://github.com/morheus9/crossplane-infra
     targetRevision: HEAD
-    path: .
+    path: apps
     directory:
-      include: "apps/*.yaml"
+      include: "*.yaml"
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
