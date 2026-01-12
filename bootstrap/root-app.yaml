@@ -5,7 +5,7 @@ metadata:
   name: root-app
   namespace: argocd
   finalizers:
-    - resources-finalizer.argocd.argoproj.io
+    - argoproj.io/resources-finalizer
   labels:
     app.kubernetes.io/name: root-app
     app.kubernetes.io/component: application-controller

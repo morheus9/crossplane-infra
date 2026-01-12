@@ -5,7 +5,7 @@ metadata:
   name: crossplane
   namespace: crossplane-system
   finalizers:
-    - resources-finalizer.argocd.argoproj.io
+    - argoproj.io/resources-finalizer
   labels:
     app.kubernetes.io/name: crossplane
 spec:

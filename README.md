@@ -56,7 +56,7 @@ helm repo update
 # Установить ArgoCD с нашей конфигурацией
 helm install argocd argo/argo-cd \
   --namespace argocd \
-  --version 9.2.3 \
+  --version 9.3.0 \
   --values charts/argocd/values.yaml \
   --wait
 ```

@@ -5,7 +5,7 @@ metadata:
   name: argocd
   namespace: argocd
   finalizers:
-    - resources-finalizer.argocd.argoproj.io
+    - argoproj.io/resources-finalizer
   labels:
     app.kubernetes.io/name: argocd
 spec:
