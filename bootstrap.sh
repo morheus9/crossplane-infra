@@ -68,7 +68,7 @@ kubectl wait --for=condition=ready --timeout=300s pod -l app.kubernetes.io/name=
 echo -e "${GREEN}✅ ArgoCD готов${NC}"
 
 # Шаг 5: Получение пароля администратора
-echo -e "\n${BLUE}🔐 Шаг 4: Получение пароля администратора${NC}"
+echo -e "\n${YELLOW}🔐 Шаг 5: Получение пароля администратора${NC}"
 sleep 5
 MAX_RETRIES=10
 RETRY_COUNT=0
@@ -99,7 +99,7 @@ else
 fi
 
 # Шаг 6: Установка Root Application
-echo -e "\n${YELLOW}📦 Шаг 5: Установка Root Application${NC}"
+echo -e "\n${YELLOW}📦 Шаг 6: Установка Root Application${NC}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_APP_PATH="$SCRIPT_DIR/bootstrap/root-app.yaml"
 
@@ -112,7 +112,7 @@ kubectl apply -f "$ROOT_APP_PATH"
 echo -e "${GREEN}✅ Root Application установлен${NC}"
 
 # Шаг 7: Информация о namespaces
-echo -e "\n${BLUE}📋 Информация о развертывании:${NC}"
+echo -e "\n${YELLOW}📋 Шаг 7: Информация о развертывании${NC}"
 echo ""
 echo -e "${GREEN}Namespaces, которые будут созданы:${NC}"
 echo -e "  ${YELLOW}argocd${NC}                    - ArgoCD + все Applications (управление)"
@@ -127,8 +127,8 @@ echo ""
 
 # Итоговая информация
 echo -e "${GREEN}=================================================="
-echo "✅ Bootstrap завершен успешно!"
-echo "==================================================${NC}"
+echo -e "${GREEN}✅ Bootstrap завершен успешно!"
+echo -e "${GREEN}==================================================${NC}"
 echo ""
 echo -e "${BLUE}📋 Следующие шаги:${NC}"
 echo ""
@@ -136,8 +136,14 @@ echo "1. Проверьте статус приложений:"
 echo -e "   ${YELLOW}kubectl get applications -n argocd${NC}"
 echo ""
 echo "2. Доступ к ArgoCD UI:"
-echo -e "   ${YELLOW}kubectl port-forward svc/argocd-server -n argocd 8080:443${NC}"
-echo "   Откройте: https://localhost:8080"
+echo -e "   ${YELLOW}# Способ 1: Port-forward напрямую к pod'у (рекомендуется, более стабильно)${NC}"
+echo -e "   ${YELLOW}ARGOCD_POD=\$(kubectl get pod -n argocd -l app.kubernetes.io/name=argocd-server -o jsonpath='{.items[0].metadata.name}')${NC}"
+echo -e "   ${YELLOW}kubectl port-forward -n argocd pod/\$ARGOCD_POD 8080:8080${NC}"
+echo ""
+echo -e "   ${YELLOW}# Способ 2: Port-forward через сервис (может быть нестабильным)${NC}"
+echo -e "   ${YELLOW}kubectl port-forward svc/argocd-server -n argocd 8080:80${NC}"
+echo ""
+echo "   Откройте в браузере: http://localhost:8080"
 echo "   Логин: admin"
 if [ -n "$ADMIN_PASSWORD" ]; then
     echo -e "   Пароль: ${YELLOW}$ADMIN_PASSWORD${NC}"
