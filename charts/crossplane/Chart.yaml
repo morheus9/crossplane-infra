@@ -9,4 +9,4 @@ appVersion: "2.1.3"
 dependencies:
   - name: crossplane
     version: "2.1.3"
-    repository: "https://charts.crossplane.io/stable"
+    repository: "https://charts.crossplane.io"

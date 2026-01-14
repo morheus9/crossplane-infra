@@ -48,16 +48,14 @@ if helm list -n argocd | grep -q argocd; then
     echo -e "${YELLOW}⚠️  ArgoCD уже установлен. Обновляю...${NC}"
     helm upgrade argocd argo/argo-cd \
         --namespace argocd \
-        --version 9.2.3 \
+        --version 9.3.0 \
         --wait --timeout 10m
 else
     helm install argocd argo/argo-cd \
         --namespace argocd \
-        --version 9.2.3 \
-        --set server.service.type=LoadBalancer \
-        --set server.extraArgs[0]=--insecure \
-        --set server.extraArgs[1]=--disable-auth \
-        --wait --timeout 10m
+        --version 9.3.0 \
+        --values charts/argocd/values.yaml \
+        --wait    
 fi
 echo -e "${GREEN}✅ ArgoCD установлен${NC}"
 
@@ -136,12 +134,8 @@ echo "1. Проверьте статус приложений:"
 echo -e "   ${YELLOW}kubectl get applications -n argocd${NC}"
 echo ""
 echo "2. Доступ к ArgoCD UI:"
-echo -e "   ${YELLOW}# Способ 1: Port-forward напрямую к pod'у (рекомендуется, более стабильно)${NC}"
-echo -e "   ${YELLOW}ARGOCD_POD=\$(kubectl get pod -n argocd -l app.kubernetes.io/name=argocd-server -o jsonpath='{.items[0].metadata.name}')${NC}"
-echo -e "   ${YELLOW}kubectl port-forward -n argocd pod/\$ARGOCD_POD 8080:8080${NC}"
-echo ""
-echo -e "   ${YELLOW}# Способ 2: Port-forward через сервис (может быть нестабильным)${NC}"
-echo -e "   ${YELLOW}kubectl port-forward svc/argocd-server -n argocd 8080:80${NC}"
+echo -e "   ${YELLOW}pkill -f "kubectl port-forward""
+echo -e "   ${YELLOW}kubectl port-forward svc/argocd-server -n argocd 8080:80"
 echo ""
 echo "   Откройте в браузере: http://localhost:8080"
 echo "   Логин: admin"
@@ -158,3 +152,4 @@ echo "4. Проверка развернутых компонентов:"
 echo -e "   ${YELLOW}kubectl get pods -n crossplane-system${NC}"
 echo -e "   ${YELLOW}kubectl get pods -n external-secrets-system${NC}"
 echo ""
+    
